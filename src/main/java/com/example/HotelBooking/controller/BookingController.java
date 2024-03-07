@@ -3,10 +3,14 @@ package com.example.HotelBooking.controller;
 import com.example.HotelBooking.exception.InvalidBookingRequestException;
 import com.example.HotelBooking.exception.ResourceNotFoundException;
 import com.example.HotelBooking.model.BookedRoom;
+import com.example.HotelBooking.model.FeedBack;
 import com.example.HotelBooking.model.Room;
+import com.example.HotelBooking.repository.FeedbackRepository;
 import com.example.HotelBooking.response.BookingResponse;
+import com.example.HotelBooking.response.FeedBackResponse;
 import com.example.HotelBooking.response.RoomResponse;
 import com.example.HotelBooking.service.IBookingService;
+import com.example.HotelBooking.service.IFeedbackService;
 import com.example.HotelBooking.service.IRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +31,9 @@ public class BookingController {
     private final IBookingService bookingService;
 
     private final IRoomService roomService;
-
+    private final IFeedbackService iFeedbackService;
+    @Autowired
+    private FeedbackRepository feedbackRepository;
     @GetMapping("/all-bookings")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<BookingResponse>> getAllBookigs() {
@@ -85,9 +91,19 @@ public class BookingController {
                 booking.getNumOfChildren(), booking.getTotalNumOfGuest(),
                 booking.getBookingConfirmationCode(), room);
     }
-    @GetMapping("/hello")
-    public String home(){
-        return "hello world";
+    @PostMapping("/add-feedback")
+    public ResponseEntity<?> getFeedback(@RequestBody FeedBack feedBack){
+      iFeedbackService.saveTo(feedBack);
+        System.out.println("Added...");
+      return ResponseEntity.ok(HttpStatus.ACCEPTED);
     }
+    @GetMapping("/id/{roomId}")
+    public ResponseEntity<List<FeedBack>> getRoomId(@PathVariable("roomId") Long roomId){
+        System.out.println(roomId);
+        List<FeedBack>feedBackList=iFeedbackService.findByRoomId(roomId);
+        return ResponseEntity.ok(feedBackList) ;
+    }
+
 }
+
     
